@@ -1,0 +1,27 @@
+version: 1
+send_anonymous_usage_stats: false
+plugins:
+  extractors:
+    - name: tap-csv
+      variant: meltano
+      pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
+      config:
+        files:
+          - entity: "leads"
+          - file: "./leads.csv"
+          - keys: ["id"]
+  loaders:
+    - name: target-jsonl
+      pip_url: git+https://github.com/andyhuynh3/target-jsonl.git
+  orchestrators:
+    - name: airflow
+      pip_url: apache-airflow==1.10.13 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-1.10.13/constraints-3.8.txt
+  files:
+    - name: airflow
+      pip_url: git+https://gitlab.com/meltano/files-airflow.git
+schedules:
+  - name: csv__json
+    extractor: tap-csv
+    loader: target-jsonl
+    transform: skip
+    interval: "@daily"
